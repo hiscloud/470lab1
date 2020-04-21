@@ -41,7 +41,13 @@ void exitMode(deque<string> cmd){
 }
 void promptMode(deque<string> cmd, string* prompt){
 	if (cmd.size()==1){
-		prompt 
+		*prompt="cwushell> "; 
+	}else if(cmd.size()==2){
+		*prompt=cmd[1];
+		*prompt+="> ";
+		
+	}else{
+		cout<<"Please enter only one argument after prompt."<<endl;
 	}
 	
 }
@@ -62,7 +68,10 @@ void manualMode(deque<string> cmd){
 		cout<<"NAME\n	cwushell\n";
 		cout<<"DESCRIPTION\n	cwushell is a linux shell which mainly provides the feature of checking the cpu and memory information of one linux machine.\n";
 		cout<<"OPTIONS\n	1. exit [n] -- terminates the shell with the exit value n if argument is given, otherwise the exit value will be the value returned bythe last executed command (or 0 if no commands were executed).\n";
-		cout<<"	2. prompt <new prompt> -- change the current shell prompt to the new_prompt. If no arguments given, will change to cwushell\n.";							
+		cout<<"	2. prompt <new prompt> -- change the current shell prompt to the new_prompt. If no arguments given, will change to cwushell\n.";	
+		cout<<"	3. cpuinfo -switch --1)-c will print the cpu clock(e.g.3.2GHz),2)-t will print the cpu type(e.g. Intel) and 3) -n -will print the number of cores(eg.8).\n";
+	    cout<<" 4. meminfo -swich -- 1)-t will print the total RAM memory available in the system in bytes, 2) -u will print the used RAM memory and 3) -c will print the size of the L2 cache/core in bytes.\n";
+		cout<<"	5. all other exising shell commands(e.g. ls, cat,pwd).";
 		
 	}
 }
