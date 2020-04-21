@@ -43,10 +43,17 @@ void promptMode(deque<string> cmd, string* prompt){
 	if (cmd.size()==1){
 		*prompt="cwushell> "; 
 	}else if(cmd.size()==2){
-		*prompt=cmd[1];
-		*prompt+="> ";
+		if(cmd[1]=="-h" || cmd[1]=="-help" ){
+			cout<<"Usage: prompt [new prompt]\n";
+			cout<<"Change the current prompt to a new one which is given by the paramter. If there's no parameters, the prompt will be changed to the default (cwushell>)\n";	
+		}else{
+			*prompt=cmd[1];
+			*prompt+="> ";
+		}
+	}
 		
 	}else{
+		
 		cout<<"Please enter only one argument after prompt."<<endl;
 	}
 	
