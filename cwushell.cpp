@@ -61,20 +61,38 @@ void promptMode(deque<string> cmd, string* prompt){
 }
 
 void cpuinfoMode(deque<string> cmd){
-	if (cmd.size()==1 || (cmd.size()==2&& (cmd[1]=="-h"||cmd[1]=="-help))){
-		cout<<"Usage: prompt [new prompt]\n";			       
+	if (cmd.size()==1 || (cmd.size()==2&& (cmd[1]=="-h"||cmd[1]=="-help"))){
+		cout<<"Usage: cpuinfo [-switch]\n";			       
 		cout<<"	 cpuinfo -switch --1)-c will print the cpu clock(e.g.3.2GHz),2)-t will print the cpu type(e.g. Intel) and 3) -n -will print the number of cores(eg.8).\n";				       
 	}else if (cmd.size()==2){
-		if (cmd[1]=="-c){
+		if (cmd[1]=="-n"){
 		    //http://www.cplusplus.com/forum/unices/6544/
 		    	FILE * fp;
 			char res[128];
-			fp = popen("/bin/cat /proc/cpuinfo |grep -c '^processor'","r");
+			fp = popen("cat /proc/cpuinfo |grep -c '^processor'","r");
 			fread(res, 1, sizeof(res)-1, fp);
 			fclose(fp);
-			cout << "number of core: " << res[0] << endl;
-			return 0;
-		    }
+			cout << "number of cores: " << res[0] << endl;
+			
+		 }
+		if(cmd[1]=="-c"){
+		//http://www.cplusplus.com/forum/unices/6544/
+		    	FILE * fp;
+			char res[128];
+			fp = popen("/bin/cat /proc/cpuinfo |grep 'cpu MHz'","r");
+			fread(res, 1, sizeof(res)-1, fp);
+			fclose(fp);
+			cout <<res[0] << endl;
+		}
+		if(cmd[1]=="-t"){
+		//http://www.cplusplus.com/forum/unices/6544/
+		    	FILE * fp;
+			char res[128];
+			fp = popen("/bin/cat /proc/cpuinfo |grep 'model name'","r");
+			fread(res, 1, sizeof(res)-1, fp);
+			fclose(fp);
+			cout <<  res[0] << endl;
+		}
 	}
 	
 }
