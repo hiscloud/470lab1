@@ -46,7 +46,7 @@ void promptMode(deque<string> cmd, string* prompt){
 	}else if(cmd.size()==2){
 		if(cmd[1]=="-h" || cmd[1]=="-help" ){
 			cout<<"Usage: prompt [new prompt]\n";
-			cout<<"Change the current prompt to a new one which is given by the paramter. If there's no parameters, the prompt will be changed to the default (cwushell>).\n";	
+			cout<<"Change the current prompt to a new one which is given by the parameter. If there's no parameters, the prompt will be changed to the default (cwushell>).\n";	
 		}else{
 			*prompt=cmd[1];
 			*prompt+="> ";
@@ -72,7 +72,11 @@ void cpuinfoMode(deque<string> cmd){
 			fp = popen("cat /proc/cpuinfo |grep -c '^processor'","r");
 			fread(res, 1, sizeof(res)-1, fp);
 			fclose(fp);
-			cout << "number of cores: " << res[0] << endl;
+			string s="";
+			for(int i=0;i<sizeof(res);i++){
+				s+=res[i];
+			}
+			cout << "number of cores: " << s << endl;
 			
 		 }
 		if(cmd[1]=="-c"){
@@ -82,7 +86,11 @@ void cpuinfoMode(deque<string> cmd){
 			fp = popen("/bin/cat /proc/cpuinfo |grep 'cpu MHz'","r");
 			fread(res, 1, sizeof(res)-1, fp);
 			fclose(fp);
-			cout <<res[0] << endl;
+			string s="";
+			for(int i=0;i<sizeof(res);i++){
+				s+=res[i];
+			}
+			cout <<"cpu clock: "<<s << endl;
 		}
 		if(cmd[1]=="-t"){
 		//http://www.cplusplus.com/forum/unices/6544/
@@ -91,7 +99,11 @@ void cpuinfoMode(deque<string> cmd){
 			fp = popen("/bin/cat /proc/cpuinfo |grep 'model name'","r");
 			fread(res, 1, sizeof(res)-1, fp);
 			fclose(fp);
-			cout <<  res[0] << endl;
+			string s="";
+			for(int i=0;i<sizeof(res);i++){
+				s+=res[i];
+			}
+			cout <<"cpu type"<<  s << endl;
 		}
 	}
 	
