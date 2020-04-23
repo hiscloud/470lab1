@@ -1,3 +1,6 @@
+//Junyu Lu 41176974
+//This is my own work.
+
 #include <iostream>
 #include <unistd.h>
 #include <deque>
@@ -33,7 +36,7 @@ void exitMode(deque<string> cmd){
 		try {
 			exit(stoi(exitCode));
 		}catch(const exception& e){
-			cout<<"command vexit only works with a number!"<<endl;
+			cout<<"command exit only works with a number!"<<endl;
 		}
 	}
 	else{
@@ -62,50 +65,60 @@ void promptMode(deque<string> cmd, string* prompt){
 }
 
 void cpuinfoMode(deque<string> cmd){
+	string clockS,typeS,numberS,dummy;
+
+	ifstream in;
+	in.open("/proc/cpuinfo");
+	while(in.good()){
+		in>>dummy;
+		if (dummy=="MHz"){
+			in>>dummy;
+			in>>clockS;
+			
+		}
+		if(dummy=="name"){
+			in>>dummy;
+			getline(in,typeS);
+			
+		}
+		if(dummy=="cores"){
+			in>>dummy;
+		   in>>numberS;
+		 
+		}
+	}
+	in.close();
 	if (cmd.size()==1 || (cmd.size()==2&& (cmd[1]=="-h"||cmd[1]=="-help"))){
 		cout<<"Usage: cpuinfo [-switch]\n";			       
 		cout<<"1)-c will print the cpu clock(e.g.3.2GHz),2)-t will print the cpu type(e.g. Intel) and 3) -n -will print the number of cores(eg.8).\n";				       
-	}else if (cmd.size()==2){
-		if (cmd[1]=="-n"){
-		    //http://www.cplusplus.com/forum/unices/6544/
-		    	FILE * fp;
-			char res[128];
-			fp = popen("cat /proc/cpuinfo |grep -c '^processor'","r");
-			fread(res, 1, sizeof(res)-1, fp);
-			fclose(fp);
-			string s="";
-			for(int i=0;i<sizeof(res);i++){
-				s+=res[i];
-			}
-			cout << "number of cores: " << s << endl;
-			
-		 }
-		if(cmd[1]=="-c"){
-		//http://www.cplusplus.com/forum/unices/6544/
-		    	FILE * fp;
-			char res[128];
-			fp = popen("/bin/cat /proc/cpuinfo |grep 'cpu MHz'","r");
-			fread(res, 1, sizeof(res)-1, fp);
-			fclose(fp);
-			string s="";
-			for(int i=0;i<sizeof(res);i++){
-				s+=res[i];
-			}
-			cout <<"cpu clock: "<<s << endl;
+	}else {
+		bool isValid,isC,isT,isN;
+		isValid=true;
+		isT=false;
+		isN=false;
+		isC=false;
+		for(int i=1;i<cmd.size();i++){
+			if (cmd[i]=="-c")
+				isC=true;
+			if(cmd[i]=="-t")
+				isT=true;
+			if(cmd[i]=="-n")
+				isN=true;
+			if(cmd[i]!="-c"&&cmd[i]!="-n"&&cmd[i]!="-t")
+				isValid=false;
 		}
-		if(cmd[1]=="-t"){
-		//http://www.cplusplus.com/forum/unices/6544/
-		    	FILE * fp;
-			char res[128];
-			fp = popen("/bin/cat /proc/cpuinfo |grep 'model name'","r");
-			fread(res, 1, sizeof(res)-1, fp);
-			fclose(fp);
-			string s="";
-			for(int i=0;i<sizeof(res);i++){
-				s+=res[i];
-			}
-			cout <<"cpu type"<<  s << endl;
+		if(!isValid){
+			cout<<"invalid command! Enter 'cpuinfo' to see instructions.\n";
+		}else{
+			if (isC)
+				cout<<"The cpu clock "<<clockS<<" MHz.\n";
+			if (isT)
+				cout<<"The cpu type is "<<typeS<<".\n";
+			if (isN)
+				cout<<"The number of cpu cores is "<<numberS<<".\n";
 		}
+		
+		
 	}
 	
 }
@@ -123,11 +136,13 @@ void meminfoMode(deque<string> cmd){
 	in>>totalMemS; //both kB
 	in>>dummy>>dummy;
 	in>>freeMemS; 
-	int totalMem= stoi(totalMemS);
-	int freeMem= stoi(freeMemS);
-	int usedMem= totalMem - freeMem;
+	long totalMem= stol(totalMemS);
+	long freeMem= stol(freeMemS);
+	long usedMem= totalMem - freeMem;
 
-	int l2cache=stoi(l2cacheS);
+	long l2cache=stol(l2cacheS);
+	
+	in.close();
 	if(cmd.size()==1 ||(cmd.size()==2&&(cmd[1]=="-help"||cmd[1]=="-h"))){
 		cout<<"Usage: meminfo [-switch]\n";
 		cout<<"1)-t will print the total RAM memory available in the system in bytes, 2) -u will print the used RAM memory and 3) -c will print the size of the L2 cache/core in bytes.\n";
@@ -144,8 +159,8 @@ void meminfoMode(deque<string> cmd){
 				isU=true;
 			if(cmd[i]=="-c")
 				isC=true;
-			if(cmd[i]!="-c"||cmd[i]!="-u"||cmd[i]!="-t")
-				isValid==false;
+			if(cmd[i]!="-c"&&cmd[i]!="-u"&&cmd[i]!="-t")
+				isValid=false;
 		}
 		if(!isValid){
 			cout<<"invalid command! Enter 'meminfo' to see instructions.\n";
@@ -155,7 +170,7 @@ void meminfoMode(deque<string> cmd){
 			if (isC)
 				cout<<"The used RAM memory is "<<usedMem*1024<<" bytes.\n";
 			if (isU)
-				cout<<"The size of the L2 cache/core is"<<l2cache*1024<<" bytes.\n";
+				cout<<"The size of the L2 cache/core is "<<l2cache*1024<<" bytes.\n";
 		}
 	}
 }
