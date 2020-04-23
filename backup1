@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <deque>
 #include <exception>
+#include <fstream>
 #include "stdio.h"
 using namespace std;
 
@@ -46,7 +47,7 @@ void promptMode(deque<string> cmd, string* prompt){
 	}else if(cmd.size()==2){
 		if(cmd[1]=="-h" || cmd[1]=="-help" ){
 			cout<<"Usage: prompt [new prompt]\n";
-			cout<<"Change the current prompt to a new one which is given by the paramter. If there's no parameters, the prompt will be changed to the default (cwushell>).\n";	
+			cout<<"Change the current prompt to a new one which is given by the parameter. If there's no parameters, the prompt will be changed to the default (cwushell>).\n";	
 		}else{
 			*prompt=cmd[1];
 			*prompt+="> ";
@@ -61,27 +62,102 @@ void promptMode(deque<string> cmd, string* prompt){
 }
 
 void cpuinfoMode(deque<string> cmd){
-	if (cmd.size()==1 || (cmd.size()==2&& (cmd[1]=="-h"||cmd[1]=="-help))){
-		cout<<"Usage: prompt [new prompt]\n";			       
-		cout<<"	 cpuinfo -switch --1)-c will print the cpu clock(e.g.3.2GHz),2)-t will print the cpu type(e.g. Intel) and 3) -n -will print the number of cores(eg.8).\n";				       
+	if (cmd.size()==1 || (cmd.size()==2&& (cmd[1]=="-h"||cmd[1]=="-help"))){
+		cout<<"Usage: cpuinfo [-switch]\n";			       
+		cout<<"1)-c will print the cpu clock(e.g.3.2GHz),2)-t will print the cpu type(e.g. Intel) and 3) -n -will print the number of cores(eg.8).\n";				       
 	}else if (cmd.size()==2){
-		if (cmd[1]=="-c){
+		if (cmd[1]=="-n"){
 		    //http://www.cplusplus.com/forum/unices/6544/
 		    	FILE * fp;
 			char res[128];
-			fp = popen("/bin/cat /proc/cpuinfo |grep -c '^processor'","r");
+			fp = popen("cat /proc/cpuinfo |grep -c '^processor'","r");
 			fread(res, 1, sizeof(res)-1, fp);
 			fclose(fp);
-			cout << "number of core: " << res[0] << endl;
-			return 0;
-		    }
+			string s="";
+			for(int i=0;i<sizeof(res);i++){
+				s+=res[i];
+			}
+			cout << "number of cores: " << s << endl;
+			
+		 }
+		if(cmd[1]=="-c"){
+		//http://www.cplusplus.com/forum/unices/6544/
+		    	FILE * fp;
+			char res[128];
+			fp = popen("/bin/cat /proc/cpuinfo |grep 'cpu MHz'","r");
+			fread(res, 1, sizeof(res)-1, fp);
+			fclose(fp);
+			string s="";
+			for(int i=0;i<sizeof(res);i++){
+				s+=res[i];
+			}
+			cout <<"cpu clock: "<<s << endl;
+		}
+		if(cmd[1]=="-t"){
+		//http://www.cplusplus.com/forum/unices/6544/
+		    	FILE * fp;
+			char res[128];
+			fp = popen("/bin/cat /proc/cpuinfo |grep 'model name'","r");
+			fread(res, 1, sizeof(res)-1, fp);
+			fclose(fp);
+			string s="";
+			for(int i=0;i<sizeof(res);i++){
+				s+=res[i];
+			}
+			cout <<"cpu type"<<  s << endl;
+		}
 	}
 	
 }
 
 void meminfoMode(deque<string> cmd){
+	string totalMemS,freeMemS,l2cacheS,dummy;
+
+	ifstream in;
+	in.open("/sys/devices/system/cpu/cpu0/cache/index2/size");
+	in>> l2cacheS;
 	
-	
+	in.close();	
+	in.open("/proc/meminfo");
+	in>>dummy;
+	in>>totalMemS; //both kB
+	in>>dummy>>dummy;
+	in>>freeMemS; 
+	int totalMem= stoi(totalMemS);
+	int freeMem= stoi(freeMemS);
+	int usedMem= totalMem - freeMem;
+
+	int l2cache=stoi(l2cacheS);
+	if(cmd.size()==1 ||(cmd.size()==2&&(cmd[1]=="-help"||cmd[1]=="-h"))){
+		cout<<"Usage: meminfo [-switch]\n";
+		cout<<"1)-t will print the total RAM memory available in the system in bytes, 2) -u will print the used RAM memory and 3) -c will print the size of the L2 cache/core in bytes.\n";
+	}else{
+		bool isValid,isT,isU,isC;
+		isValid=true;
+		isT=false;
+		isU=false;
+		isC=false;
+		for(int i=1;i<cmd.size();i++){
+			if (cmd[i]=="-t")
+				isT=true;
+			if(cmd[i]=="-u")
+				isU=true;
+			if(cmd[i]=="-c")
+				isC=true;
+			if(cmd[i]!="-c"||cmd[i]!="-u"||cmd[i]!="-t")
+				isValid==false;
+		}
+		if(!isValid){
+			cout<<"invalid command! Enter 'meminfo' to see instructions.\n";
+		}else{
+			if (isT)
+				cout<<"The total RAM memory is "<<totalMem*1024<<" bytes.\n";
+			if (isC)
+				cout<<"The used RAM memory is "<<usedMem*1024<<" bytes.\n";
+			if (isU)
+				cout<<"The size of the L2 cache/core is"<<l2cache*1024<<" bytes.\n";
+		}
+	}
 }
 void manualMode(deque<string> cmd){
 	if (cmd.size()>=2){
